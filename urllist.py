@@ -120,6 +120,8 @@ with open(txtfile) as file:
 
 #remove duplicates
 urls = list(dict.fromkeys(urls))
+while("" in urls):
+    urls.remove("")
 
 hStat = httpStat(urls)
 for h2 in hStat:
