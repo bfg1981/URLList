@@ -18,7 +18,9 @@ def cache_validation_cb(metadata):
 
 @memory.cache(cache_validation_callback=cache_validation_cb)
 def httpStat1(url):
-    return requests.get(url, headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+    r = requests.get(url, headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+    r.encoding = r.apparent_encoding
+    return r
 
 def httpStat(urls):
     return [httpStat1(url) for url in urls]
@@ -129,6 +131,7 @@ for h2 in hStat:
 html='''
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html> <head>
+<meta charset="utf-8" />
 <style>
 img {
     object-fit: cover;
