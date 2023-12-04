@@ -92,7 +92,7 @@ def genPreview(hStat):
     parser.feed(t)
     print(hStat.url)
     OG=None
-    if parser.OG and 'og:title' in parser.OG:
+    if parser.OG and parser.OG['og:title']:
         OG=parser.OG
     else:
         OG=parser.OG_Alt
