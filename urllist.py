@@ -28,11 +28,13 @@ def httpStat(urls):
 from html.parser import HTMLParser
 
 class MyHTMLParser(HTMLParser):
-    def __init__(self):
-        super().__init__() 
+    def __init__(self, baseUrl=None):
+        super().__init__()
+        self.baseUrl=baseUrl
         self.OG={'og:title':'', 'og:image':'', 'og:description':''}
         self.OG_Alt={'og:title':'', 'og:image':'', 'og:description':''}
         self.isTitle=False
+        self.hasImg=False
         self.isHead=False
     
     def handle_starttag(self, tag, attrs):
@@ -40,7 +42,18 @@ class MyHTMLParser(HTMLParser):
             self.isHead=True
             return
         if (tag=='img'):
-            #print (attrs)
+            print ('IMG');
+            if not self.hasImg:
+                print('SURE')
+                print (attrs)
+                for attr in attrs:
+                    if attr[0]=='src':
+                        url=attr[1]
+                        if not (url.startswith('http://') or url.startswith('https://')):
+                            url=self.baseUrl+url
+                        self.OG_Alt['og:image']=url
+                        self.hasImg=True
+                        print(self.OG_Alt['og:image'])
             pass
         if self.isHead:
             if (tag=='title'):
@@ -88,7 +101,9 @@ def imgOrEmpty(url):
 
 def genPreview(hStat):
     t=hStat.text
-    parser = MyHTMLParser()
+    baseUrl=str.join('/',hStat.url.split('/')[0:3])
+    print(baseUrl)
+    parser = MyHTMLParser(baseUrl)
     parser.feed(t)
     print(hStat.url)
     OG=None
