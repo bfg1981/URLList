@@ -42,10 +42,7 @@ class MyHTMLParser(HTMLParser):
             self.isHead=True
             return
         if (tag=='img'):
-            print ('IMG');
             if not self.hasImg:
-                print('SURE')
-                print (attrs)
                 for attr in attrs:
                     if attr[0]=='src':
                         url=attr[1]
@@ -53,18 +50,13 @@ class MyHTMLParser(HTMLParser):
                             url=self.baseUrl+url
                         self.OG_Alt['og:image']=url
                         self.hasImg=True
-                        print(self.OG_Alt['og:image'])
             pass
         if self.isHead:
             if (tag=='title'):
                 self.isTitle=True
-#                print('Start')
         if (tag=='meta'):
-#            print("Encountered a start tag:", tag)
-#            print(attrs)
             isOG=False
             P=''
-#            print(attrs)
             for attr in attrs:
                 if 'property' in attr:
                     if attr[1].startswith('og:'):
@@ -84,13 +76,11 @@ class MyHTMLParser(HTMLParser):
             return
         if self.isHead and (tag=='title'):
             self.isTitle=False
-        #print("Encountered an end tag :", tag)
         pass
     
     def handle_data(self, data):
         if self.isTitle:
             self.OG_Alt['og:title']=data
-        #print("Encountered some data  :", data)
 
 
 def imgOrEmpty(url):
@@ -102,7 +92,6 @@ def imgOrEmpty(url):
 def genPreview(hStat):
     t=hStat.text
     baseUrl=str.join('/',hStat.url.split('/')[0:3])
-    print(baseUrl)
     parser = MyHTMLParser(baseUrl)
     parser.feed(t)
     print(hStat.url)
@@ -124,7 +113,6 @@ if len(sys.argv)<3:
     s=txtfile.split('.')
     if s[-1]=='txt':
         htmlfile=str.join('.', s[0:-1]) + '.html'
-        print(htmlfile)
     else:
         sys.exit(1)
 else:
@@ -141,9 +129,6 @@ while("" in urls):
 hStat = httpStat(urls)
 for h2 in hStat:
     h=h2.headers
-    #if 'last-modified' in h:
-    #    print(h['last-modified'])
-    #print(h['date'])
 
 html='''
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
@@ -174,10 +159,6 @@ table.outer, td.outer {
 
 tStr=''
 for h2 in hStat:
-    #for property, value in vars(h2).items():
-    #    print(property, ":", value)
-    #sys.exit(0)
-    #print(h2.headers)
     tStr+='<tr>'
     tStr+=genPreview(h2)
     tStr+='</tr>'
