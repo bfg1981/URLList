@@ -5,19 +5,39 @@ import sys
 import json
 
 from joblib import Memory
-location="cachedir"
-#memory = Memory(location, verbose=0)
-memory = Memory(location)
+
+ERROR=1
+WARNING=ERROR<<1
+INFO=WARNING<<1
+
+DEBUG_LEVEL=WARNING
+DEBUG=False
+progressReport = True
+
+def NOOP(func):
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
 
 def cache_validation_cb(metadata):
-    print('Validate')
-    print(metadata)
+    #print('Cache validate')
+    #print(metadata)
     return True
     # Only retrieve cached results for calls that take more than 1s
     return metadata['duration'] > 1
 
-@memory.cache(cache_validation_callback=cache_validation_cb)
+if DEBUG:
+    location="cachedir"
+    #memory = Memory(location, verbose=0)
+    memory = Memory(location)
+    mcache=memory.cache(cache_validation_callback=cache_validation_cb)
+else:
+    mcache=NOOP
+
+@mcache
 def httpStat1(url):
+    if progressReport:
+        print('Retrieving %s' % (url))
     r = requests.get(url, headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
     r.encoding = r.apparent_encoding
     return r
@@ -92,9 +112,10 @@ def imgOrEmpty(url):
 def genPreview(hStat):
     t=hStat.text
     baseUrl=str.join('/',hStat.url.split('/')[0:3])
+    if progressReport:
+        print('Processing %s' % (hStat.url))
     parser = MyHTMLParser(baseUrl)
     parser.feed(t)
-    print(hStat.url)
     OG=None
     if parser.OG and parser.OG['og:title']:
         OG=parser.OG
@@ -104,7 +125,8 @@ def genPreview(hStat):
     if not OG['og:title']:
         OG['og:title']=hStat.url
 
-    print(OG)
+    if DEBUG_LEVEL>=INFO:
+        print(OG)
     #return ('<td><a href="%s">%s</a></td><td>%s</td><td>%s</td>'% (hStat.url, OG['og:title'], imgOrEmpty(OG['og:image']), OG['og:description']))
     return ('<td class="outer"><a href="%s"><table><tr><th colspan="2">%s</th></tr><tr><td>%s</td><td>%s</td></tr></table></a></td>'% (hStat.url, OG['og:title'], imgOrEmpty(OG['og:image']), OG['og:description']))
 
